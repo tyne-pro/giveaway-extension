@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    :root { --bg: #0f0e0d; --card: #1d1b18; --border: #34302b; --text: #f3eee6; --muted: #a9a299; --accent: #f0a33a; }
+    * { box-sizing: border-box; }
+    body { width: 300px; margin: 0; padding: 14px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); font-size: 13px; }
+    h1 { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 15px; }
+    h1 b { color: var(--accent); margin-left: -8px; }
+    button { display: block; width: 100%; margin: 0 0 8px; padding: 11px 12px; text-align: left; font: inherit; color: var(--text); background: var(--card); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
+    button:hover { border-color: var(--accent); }
+    button strong { display: block; font-size: 13px; }
+    button span { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; }
+    p { margin: 10px 0 0; color: var(--muted); font-size: 11px; }
+  </style>
+</head>
+<body>
+  <h1><img src="icons/icon-32.png" width="20" height="20" alt="" />tyne<b>.pro</b></h1>
+  <button id="giveaway"><strong>Розіграш в Instagram</strong><span>Зібрати коментарі під відкритим постом</span></button>
+  <button id="gbp"><strong>Аудит бізнесу в Google</strong><span>Відкрити інструмент у кабінеті</span></button>
+  <button id="cabinet"><strong>Кабінет</strong><span>Усі інструменти</span></button>
+  <p>Дані читаються з вашої сесії в браузері й надсилаються лише у ваш кабінет.</p>
+  <script src="menu.js"></script>
+</body>
+</html>
