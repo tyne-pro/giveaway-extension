@@ -2,7 +2,7 @@
 
 **UA** · [EN](#english)
 
-Браузерне розширення для Chrome та Edge, яке збирає коментарі під постом або Reels в Instagram для розіграшу в кабінеті [cp.tyne.pro](https://cp.tyne.pro/tools/giveaway). Тут лежить увесь його код — той самий, що й в архіві для завантаження. Його можна прочитати й перевірити.
+Офіційне розширення сайту [tyne.pro](https://tyne.pro/tools/instagram-giveaways/). Воно зроблене тільки для інструмента «Розіграш в Instagram» у кабінеті tyne.pro: збирає коментарі під постом або Reels, щоб ви провели розіграш у кабінеті. Тут лежить увесь його код — той самий, що й в архіві для завантаження, — щоб кожен міг його прочитати й перевірити.
 
 ## Що робить і чого не робить
 
@@ -16,7 +16,7 @@
 | Дозвіл | Навіщо |
 |---|---|
 | `https://www.instagram.com/*`, `https://i.instagram.com/*` | Звідти розширення бере коментарі й список підписок для перевірки умов розіграшу. Інших сайтів воно не бачить. |
-| `cookies` | Читає один cookie Instagram — `csrftoken`, бо без нього Instagram не віддає коментарі. Пароль і cookie інших сайтів недоступні. |
+| `cookies` | Читає лише один службовий cookie Instagram, без якого той не віддає коментарі. Пароль і cookie інших сайтів недоступні. |
 | `tabs`, `activeTab` | Бере адресу відкритого поста й відкриває вікно розширення в новій вкладці. |
 
 ## Файли
@@ -53,7 +53,7 @@
 
 ## English
 
-A Chrome and Edge extension that collects the comments under an Instagram post or Reel for a giveaway in the [cp.tyne.pro](https://cp.tyne.pro/tools/giveaway) cabinet. This repository holds all of its code, the same as in the downloadable zip, so you can read and check it.
+The official extension of [tyne.pro](https://tyne.pro/en/tools/instagram-giveaways/). It is made only for the “Instagram giveaways” tool in the tyne.pro cabinet: it collects the comments under a post or Reel so you can run the giveaway in the cabinet. This repository holds all of its code, the same as in the downloadable zip, so anyone can read and check it.
 
 **What it does and does not do**
 
@@ -65,7 +65,7 @@ A Chrome and Edge extension that collects the comments under an Instagram post o
 **Permissions**
 
 - `https://www.instagram.com/*`, `https://i.instagram.com/*`: where it reads comments and follow lists to check the giveaway conditions. It cannot see other sites.
-- `cookies`: reads one Instagram cookie, `csrftoken`, because Instagram does not return comments without it. No password, no cookies of other sites.
+- `cookies`: reads only one Instagram service cookie, without which Instagram does not return comments. No password, no cookies of other sites.
 - `tabs`, `activeTab`: reads the address of the open post and opens the extension window in a new tab.
 
 **Verify the zip**
