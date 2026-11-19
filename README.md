@@ -33,7 +33,7 @@
 
 ## Перевірка архіву
 
-Архів для завантаження лежить у [релізах](../../releases) і на сайті: `https://cp.tyne.pro/downloads/tyne-giveaway-extension.zip`.
+Архів для завантаження лежить на сайті: `https://cp.tyne.pro/downloads/tyne-giveaway-extension.zip`. Його вміст збігається з файлами цього репозиторію.
 
 - Версія **1.4.1**, SHA-256 архіву:
   `ec7ae2cec866bf85d92b3601d485519ec39e448939903c7dd50996a92f140296`
@@ -70,7 +70,7 @@ The official extension of [tyne.pro](https://tyne.pro/en/tools/instagram-giveawa
 
 **Verify the zip**
 
-The zip is in [Releases](../../releases) and at `https://cp.tyne.pro/downloads/tyne-giveaway-extension.zip`. Version 1.4.1, SHA-256 `ec7ae2cec866bf85d92b3601d485519ec39e448939903c7dd50996a92f140296`. [VirusTotal report](https://www.virustotal.com/gui/file/ec7ae2cec866bf85d92b3601d485519ec39e448939903c7dd50996a92f140296): as of 19 Nov 2026, flagged by 0 of 42 antivirus engines.
+The zip is at `https://cp.tyne.pro/downloads/tyne-giveaway-extension.zip`; its contents match the files in this repository. Version 1.4.1, SHA-256 `ec7ae2cec866bf85d92b3601d485519ec39e448939903c7dd50996a92f140296`. [VirusTotal report](https://www.virustotal.com/gui/file/ec7ae2cec866bf85d92b3601d485519ec39e448939903c7dd50996a92f140296): as of 19 Nov 2026, flagged by 0 of 42 antivirus engines.
 
 **Install**: unzip, open `chrome://extensions`, turn on Developer mode, click Load unpacked and pick the folder.
 
