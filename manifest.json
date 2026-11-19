@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Giveaway · tyne.pro",
+  "version": "1.4.1",
+  "description": "Збирає всі коментарі під постом або reels Instagram для розіграшу в кабінеті tyne.pro. Працює з вашої сесії у браузері.",
+  "permissions": [
+    "cookies",
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://www.instagram.com/*",
+    "https://i.instagram.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Giveaway · tyne.pro: зібрати коментарі",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    }
+  },
+  "short_name": "Giveaway tyne.pro",
+  "homepage_url": "https://cp.tyne.pro/tools/giveaway",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}
