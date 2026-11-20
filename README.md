@@ -35,10 +35,10 @@
 
 Архів для завантаження лежить на сайті: `https://cp.tyne.pro/downloads/tyne-giveaway-extension.zip`. Його вміст збігається з файлами цього репозиторію.
 
-- Версія **2.0.0**, SHA-256 архіву:
-  `509d3242fd79cab4c8d195608029bafa73ea7f37f81febfeebabc5142c633185`
+- Версія **2.1.0**, SHA-256 архіву:
+  `0e643c546acc8366b731d185b60d1d61c1b663fcf62305eb366006273a8cb224`
 - Перевірити на Mac: `shasum -a 256 tyne-giveaway-extension.zip`, у Windows: `certutil -hashfile tyne-giveaway-extension.zip SHA256`. Рядок має збігтися з наведеним вище.
-- [Звіт VirusTotal](https://www.virustotal.com/gui/file/509d3242fd79cab4c8d195608029bafa73ea7f37f81febfeebabc5142c633185): на 19.11.2026 загрозу знайшли 0 з 61 антивірусів. Звіт можна відкрити й самостійно: на virustotal.com вставте SHA-256 у пошук.
+- [Звіт VirusTotal](https://www.virustotal.com/gui/file/0e643c546acc8366b731d185b60d1d61c1b663fcf62305eb366006273a8cb224): на 19.11.2026 загрозу знайшли 0 з 61 антивірусів. Звіт можна відкрити й самостійно: на virustotal.com вставте SHA-256 у пошук.
 
 ## Встановлення
 
@@ -70,7 +70,7 @@ The official extension of [tyne.pro](https://tyne.pro/en/tools/instagram-giveawa
 
 **Verify the zip**
 
-The zip is at `https://cp.tyne.pro/downloads/tyne-giveaway-extension.zip`; its contents match the files in this repository. Version 2.0.0, SHA-256 `509d3242fd79cab4c8d195608029bafa73ea7f37f81febfeebabc5142c633185`. [VirusTotal report](https://www.virustotal.com/gui/file/509d3242fd79cab4c8d195608029bafa73ea7f37f81febfeebabc5142c633185): as of 19 Nov 2026, flagged by 0 of 61 antivirus engines.
+The zip is at `https://cp.tyne.pro/downloads/tyne-giveaway-extension.zip`; its contents match the files in this repository. Version 2.1.0, SHA-256 `0e643c546acc8366b731d185b60d1d61c1b663fcf62305eb366006273a8cb224`. [VirusTotal report](https://www.virustotal.com/gui/file/0e643c546acc8366b731d185b60d1d61c1b663fcf62305eb366006273a8cb224): as of 19 Nov 2026, flagged by 0 of 61 antivirus engines.
 
 **Install**: unzip, open `chrome://extensions`, turn on Developer mode, click Load unpacked and pick the folder.
 

@@ -14,7 +14,7 @@
         type: 'gbp-collect',
         auditId: String(data.auditId || ''),
         query: String(data.query || '').slice(0, 300),
-        keyword: String(data.keyword || '').slice(0, 120),
+        keywords: (Array.isArray(data.keywords) ? data.keywords : [data.keyword]).map((k) => String(k || '').trim().slice(0, 120)).filter(Boolean).slice(0, 4),
         city: String(data.city || '').slice(0, 80),
         lang: ['uk', 'ru', 'en'].includes(data.lang) ? data.lang : 'uk',
         token: String(data.token || ''),

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "tyne.pro",
   "short_name": "tyne.pro",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Інструменти кабінету tyne.pro у вашому браузері: розіграш у коментарях Instagram і аудит бізнесу на Google Картах. Дані читаються з вашої сесії і йдуть лише у ваш кабінет.",
   "permissions": [
     "cookies",
