@@ -131,6 +131,67 @@ function parsePlace(b) {
   };
 }
 
+// Company base: the cabinet sends the searches and a grid of map cells; the worker runs them in a background
+// Maps tab, page by page, and posts the list of companies to the cabinet that asked.
+const LANGS = ['uk', 'ru', 'en', 'pl', 'de', 'es', 'fr', 'pt', 'hi'];
+async function runLeads(message, sender) {
+  const cabinetTab = sender.tab && sender.tab.id;
+  const origin = originOf(sender.tab && sender.tab.url);
+  if (!CABINETS.some((re) => re.test(origin))) return;
+  const job = message.job || {};
+  if (!/^[0-9a-f-]{36}$/i.test(job.runId) || busy.has(job.runId)) return;
+  busy.add(job.runId);
+  const lang = LANGS.includes(job.lang) ? job.lang : 'uk';
+  const say = (m) => tell(cabinetTab, { runId: job.runId, ...m });
+  let mapsTab = null;
+  let beat = 0;
+  const heartbeat = (error) => {
+    if (!error && Date.now() - beat < 60000) return;
+    beat = Date.now();
+    fetch(`${origin}/api/public/leads/ingest`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: message.token, runId: job.runId, error }) }).catch(() => {});
+  };
+  leadsBeats.set(job.runId, heartbeat);
+  try {
+    const first = (job.cells || [])[0];
+    const url = first ? `${MAPS}/@${first.lat},${first.lng},13z?hl=${lang}` : `${MAPS}/search/${encodeURIComponent(job.place || '')}?hl=${lang}`;
+    say({ type: 'leads-progress', stage: 'open' });
+    mapsTab = await chrome.tabs.create({ url, active: false });
+    await waitLoaded(mapsTab.id);
+    await new Promise((r) => setTimeout(r, 1500));
+    const tab = await chrome.tabs.get(mapsTab.id);
+    if (!/^https:\/\/www\.google\.com\//.test(tab.url || '')) {
+      await chrome.tabs.update(mapsTab.id, { active: true });
+      mapsTab = null;
+      say({ type: 'leads-error', code: 'consent' });
+      heartbeat('consent');
+      return;
+    }
+    const got = (await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: collectLeads, args: [{ runId: job.runId, queries: (job.queries || []).slice(0, 5), place: String(job.place || ''), cells: (job.cells || []).slice(0, 25), maxRows: Math.min(Number(job.maxRows) || 100, 2400), lang }] }))[0].result;
+    if (got && got.error === 'captcha') {
+      // Google wants a "not a robot" check: leave the tab open in front so the person can pass it
+      await chrome.tabs.update(mapsTab.id, { active: true, url: `${MAPS}?hl=${lang}` });
+      mapsTab = null;
+    }
+    if (!got || got.error) throw new Error(got ? got.error : 'no_result');
+    say({ type: 'leads-progress', stage: 'send', found: got.items.length });
+    const res = await fetch(`${origin}/api/public/leads/ingest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: message.token, runId: job.runId, items: got.items, debug: got.debug }),
+    });
+    say(res.ok ? { type: 'leads-sent' } : { type: 'leads-error', code: `ingest_${res.status}` });
+  } catch (error) {
+    const code = String(error && error.message || error).slice(0, 60);
+    say({ type: 'leads-error', code });
+    heartbeat(code);
+  } finally {
+    busy.delete(job.runId);
+    leadsBeats.delete(job.runId);
+    if (mapsTab) chrome.tabs.remove(mapsTab.id).catch(() => {});
+  }
+}
+const leadsBeats = new Map();
+
 // Progress from the Maps tab goes on to the cabinet page; the messages also keep this worker awake
 const progressTargets = new Map();
 chrome.runtime.onMessage.addListener((message, sender) => {
@@ -140,6 +201,13 @@ chrome.runtime.onMessage.addListener((message, sender) => {
     runGbp(message, sender).finally(() => progressTargets.delete(message.auditId));
   } else if (message.type === 'gbp-progress' && sender.tab && /^https:\/\/www\.google\.com\//.test(sender.tab.url || '')) {
     tell(progressTargets.get(message.auditId), message);
+  } else if (message.type === 'leads-collect' && sender.tab && message.job) {
+    progressTargets.set(message.job.runId, sender.tab.id);
+    runLeads(message, sender).finally(() => progressTargets.delete(message.job.runId));
+  } else if (message.type === 'leads-progress' && sender.tab && /^https:\/\/www\.google\.com\//.test(sender.tab.url || '')) {
+    tell(progressTargets.get(message.runId), message);
+    const beat = leadsBeats.get(message.runId);
+    if (beat) beat();
   }
 });
 
@@ -242,4 +310,86 @@ async function readReviews(opts) {
   } catch (error) { debug.error = String(error && error.message || error).slice(0, 80); }
   debug.read = reviews.length;
   return { reviews, debug };
+}
+
+/** Company base: every query in every cell, page by page (20 a page, about 240 per search at most). Parses in the tab. */
+async function collectLeads(opts) {
+  const g = (a, ...path) => { for (const i of path) { if (!Array.isArray(a)) return undefined; a = a[i]; } return a; };
+  const str = (v) => (typeof v === 'string' ? v : undefined);
+  const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : undefined);
+  const ping = (extra) => { try { chrome.runtime.sendMessage({ type: 'leads-progress', runId: opts.runId, ...extra }); } catch { /* the page is gone */ } };
+  const parse = (text) => JSON.parse(text.slice(text.indexOf('\n') + 1).replace(/\/\*""\*\/\s*$/, ''));
+  const pb = (la, ln, meters, off) => `!4m12!1m3!1d${meters}!2d${ln}!3d${la}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!7i20!8i${off}!10b1!12m22!1m3!18b1!30b1!34e1!2m3!5m1!6e2!20e3!4b0!10b1!12b1!13b1!16b1!17m1!3e1!20m3!5e2!6b1!14b1!46m1!1b0!96b1!19m4!2m3!1i360!2i120!4i8`;
+  const lead = (b, query) => {
+    const placeId = str(b[78]);
+    let website = str(g(b, 7, 0));
+    if (website && website.startsWith('/url?')) { try { website = new URL(website, 'https://www.google.com').searchParams.get('q') || website; } catch { /* keep */ } }
+    return {
+      placeId, fid: str(b[10]), name: str(b[11]), categories: (g(b, 13) || []).filter((c) => typeof c === 'string').slice(0, 6),
+      address: str(b[39]) || (Array.isArray(b[2]) ? b[2].filter((x) => typeof x === 'string').join(', ') : str(b[18])),
+      district: str(b[14]), lat: num(g(b, 9, 2)), lng: num(g(b, 9, 3)),
+      phone: str(g(b, 178, 0, 0)) || str(g(b, 178, 0, 1, 1, 0)), website,
+      rating: num(g(b, 4, 7)), reviewCount: num(g(b, 4, 8)),
+      hours: Array.isArray(g(b, 203, 0)) || Array.isArray(g(b, 34, 1)),
+      status: str(g(b, 34, 4, 4)) || str(g(b, 88, 0)) || '', query,
+    };
+  };
+  const at = location.href.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  const cells = opts.cells.length ? opts.cells : [{ lat: at ? Number(at[1]) : 50.45, lng: at ? Number(at[2]) : 30.52, meters: 30000, text: true }];
+  const seen = new Set();
+  const items = [];
+  const debug = { requests: 0, errors: 0, cells: cells.length };
+  const total = cells.length * opts.queries.length;
+  // Pace like a person scrolling the map: a ceiling per search, pauses between pages and areas,
+  // a longer rest every 50 requests, and a full stop when Google starts refusing.
+  const budget = Math.min(opts.maxRequests || 400, 400);
+  const wait = (min, max) => new Promise((r) => setTimeout(r, min + Math.random() * (max - min)));
+  let stop = '';
+  let step = 0;
+  try {
+    for (const cell of cells) {
+      for (const query of opts.queries) {
+        if (stop) break;
+        step++;
+        ping({ stage: 'collect', step, total, found: items.length });
+        if (step > 1) await wait(1200, 2500);
+        const q = cell.text || !opts.cells.length ? `${query} ${opts.place}`.trim() : query;
+        let retried = false;
+        for (let off = 0; off < 300; off += 20) {
+          let list = [];
+          if (debug.requests >= budget) { stop = 'budget'; break; }
+          if (debug.requests && debug.requests % 50 === 0) await wait(8000, 12000);
+          try {
+            const res = await fetch(`/search?tbm=map&authuser=0&hl=${opts.lang}&q=${encodeURIComponent(q)}&pb=${encodeURIComponent(pb(cell.lat, cell.lng, cell.meters, off))}`, { credentials: 'include' });
+            debug.requests++;
+            if (res.redirected && /\/sorry\//.test(res.url)) { debug.errors++; stop = 'captcha'; break; }
+            if (res.status === 429 && !retried) { debug.errors++; retried = true; off -= 20; await wait(15000, 20000); continue; }
+            if (res.status === 429) { debug.errors++; stop = 'rate'; break; }
+            if (!res.ok) { debug.errors++; debug.status = res.status; break; }
+            const d = parse(await res.text());
+            list = (g(d, 0, 1) || []).map((x) => g(x, 14)).filter((b) => Array.isArray(b) && str(b[11]));
+            if (!list.length && off === 0 && Array.isArray(d[6]) && str(d[6][11])) list = [d[6]];
+          } catch (e) { debug.errors++; debug.last = String(e && e.message || e).slice(0, 60); break; }
+          let fresh = 0;
+          for (const b of list) {
+            const key = str(b[10]) || str(b[78]) || str(b[11]);
+            if (seen.has(key)) continue;
+            seen.add(key); fresh++;
+            items.push(lead(b, query));
+          }
+          if (list.length < 20 || !fresh || items.length >= opts.maxRows) break;
+          await wait(600, 1200);
+        }
+        if (items.length >= opts.maxRows) break;
+      }
+      if (items.length >= opts.maxRows || stop) break;
+    }
+  } catch (error) { debug.error = String(error && error.message || error).slice(0, 80); }
+  debug.found = items.length;
+  if (stop) debug.stop = stop;
+  // share of filled fields: a sudden zero means Google changed its answer and the reader needs fixing
+  debug.fill = { phone: items.filter((x) => x.phone).length, website: items.filter((x) => x.website).length, rating: items.filter((x) => x.rating != null).length, coords: items.filter((x) => x.lat != null).length };
+  if (!items.length && stop === 'captcha') return { error: 'captcha', debug };
+  if (!items.length && debug.errors) return { error: 'maps_failed', debug };
+  return { items: items.slice(0, opts.maxRows), debug };
 }

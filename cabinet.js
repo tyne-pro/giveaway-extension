@@ -9,6 +9,10 @@
     const data = event.data;
     if (!data || data.source !== 'tyne-cabinet') return;
     if (data.cmd === 'ping') { hello(); return; }
+    if (data.cmd === 'leads-collect' && data.job && typeof data.job === 'object') {
+      chrome.runtime.sendMessage({ type: 'leads-collect', job: data.job, token: String(data.token || '') });
+      return;
+    }
     if (data.cmd === 'gbp-collect') {
       chrome.runtime.sendMessage({
         type: 'gbp-collect',
@@ -23,7 +27,7 @@
   });
   // progress and errors from the background worker back to the page
   chrome.runtime.onMessage.addListener((message) => {
-    if (message && typeof message.type === 'string' && message.type.startsWith('gbp-')) {
+    if (message && typeof message.type === 'string' && /^(gbp|leads)-/.test(message.type)) {
       window.postMessage({ source: 'tyne-ext', ...message }, window.location.origin);
     }
   });

@@ -6,4 +6,5 @@ document.getElementById('giveaway').addEventListener('click', async () => {
   open(chrome.runtime.getURL(`giveaway.html?${params}`));
 });
 document.getElementById('gbp').addEventListener('click', () => open('https://cp.tyne.pro/tools/gbp'));
+document.getElementById('leads').addEventListener('click', () => open('https://cp.tyne.pro/tools/leads'));
 document.getElementById('cabinet').addEventListener('click', () => open('https://cp.tyne.pro/user'));
